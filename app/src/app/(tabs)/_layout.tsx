@@ -1,7 +1,8 @@
 import { Image } from 'expo-image';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import type { ColorValue } from 'react-native';
+import { HeaderButton } from '@/components/HeaderButton';
 import { t } from '@/lib/i18n';
 import { colors } from '@/lib/theme';
 
@@ -40,7 +41,15 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: t('tab.games'), headerTitle: () => <LogoTitle />, tabBarIcon: icon('basketball.fill') }}
+        options={{
+          title: t('tab.games'),
+          headerTitle: () => <LogoTitle />,
+          headerRightContainerStyle: { paddingRight: 16 },
+          headerRight: () => (
+            <HeaderButton icon="heart.fill" color={colors.accent} label={t('support.title')} onPress={() => router.push('/apoiar')} />
+          ),
+          tabBarIcon: icon('basketball.fill'),
+        }}
       />
       <Tabs.Screen name="times" options={{ title: t('tab.teams'), tabBarIcon: icon('star.fill') }} />
       <Tabs.Screen name="ajustes" options={{ title: t('tab.alerts'), tabBarIcon: icon('bell.badge.fill') }} />
