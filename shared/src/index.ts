@@ -141,6 +141,7 @@ export interface DeviceState {
   platform: Platform;
   favorites: string[]; // ids de times
   games: string[]; // ids de jogos com o sino ligado
+  muted: string[]; // ids de jogos silenciados (mesmo sendo de time favorito)
   prefs: AlertPrefs;
   settings: DeviceSettings;
   lang: Lang;

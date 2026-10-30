@@ -95,6 +95,31 @@ describe('GameService.process', () => {
     expect(notifier.sent.map((s) => s.to)).toEqual([['sino'], ['fã']]);
   });
 
+  it('jogo silenciado não notifica, mesmo sendo de time favorito', async () => {
+    const { db, notifier, service } = setup();
+    db.setGameMuted('fã', 'g1', true); // 'fã' tem o LAL como favorito
+    await service.process(g('halftime', 2, 0));
+    await service.process(g('live', 3, 700));
+    expect(notifier.sent.map((s) => s.to)).toEqual([['sino']]);
+    expect(db.getDevice('fã')?.favorites).toEqual(['13']); // continua favorito
+    expect(db.getDevice('fã')?.muted).toEqual(['g1']);
+  });
+
+  it('silêncio vale só para aquele jogo', async () => {
+    const { db, notifier, service } = setup();
+    db.setGameMuted('fã', 'outro-jogo', true);
+    await service.process(g('halftime', 2, 0));
+    await service.process(g('live', 3, 700));
+    expect(notifier.sent[0].to.sort()).toEqual(['fã', 'sino']);
+  });
+
+  it('ligar o sino tira o silêncio do jogo', async () => {
+    const { db } = setup();
+    db.setGameMuted('fã', 'g1', true);
+    db.setGameSub('fã', 'g1', true);
+    expect(db.getDevice('fã')?.muted).toEqual([]);
+  });
+
   it('ejeção só para lances novos', async () => {
     const { notifier, service } = setup();
     const old = { id: 'p1', text: 'Someone ejected', period: 2, clock: '5:00', homeScore: 0, awayScore: 0, scoring: false };

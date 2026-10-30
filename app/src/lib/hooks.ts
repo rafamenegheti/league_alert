@@ -71,7 +71,18 @@ function useDeviceMutation<V>(
 export function useToggleGame() {
   return useDeviceMutation<{ gameId: string; on: boolean }>(
     (d, v) => api.setGame(d.deviceId, v.gameId, v.on),
-    (d, v) => ({ ...d, games: v.on ? [...d.games, v.gameId] : d.games.filter((g) => g !== v.gameId) }),
+    (d, v) => ({
+      ...d,
+      games: v.on ? [...d.games, v.gameId] : d.games.filter((g) => g !== v.gameId),
+      muted: v.on ? d.muted.filter((g) => g !== v.gameId) : d.muted, // ligar o sino tira o silêncio
+    }),
+  );
+}
+
+export function useToggleMute() {
+  return useDeviceMutation<{ gameId: string; muted: boolean }>(
+    (d, v) => api.setMuted(d.deviceId, v.gameId, v.muted),
+    (d, v) => ({ ...d, muted: v.muted ? [...d.muted, v.gameId] : d.muted.filter((g) => g !== v.gameId) }),
   );
 }
 
@@ -101,9 +112,10 @@ function toggled(list: string[], id: string, on: boolean): string[] {
   return on ? [...rest, id] : rest;
 }
 
-/** Como o aparelho acompanha esse jogo: pelo sino, por time favorito, ou não acompanha. */
-export function followState(device: DeviceState | undefined, game: Game): 'bell' | 'favorite' | 'none' {
+/** Como o aparelho acompanha esse jogo: pelo sino, por time favorito, silenciado, ou não acompanha. */
+export function followState(device: DeviceState | undefined, game: Game): 'bell' | 'favorite' | 'muted' | 'none' {
   if (!device) return 'none';
+  if (device.muted?.includes(game.id)) return 'muted';
   if (device.favorites.includes(game.home.id) || device.favorites.includes(game.away.id)) return 'favorite';
   if (device.games.includes(game.id)) return 'bell';
   return 'none';

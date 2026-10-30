@@ -1,36 +1,49 @@
-import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import { Pressable, StyleSheet } from 'react-native';
 import type { Game } from '@league-alert/shared';
-import { followState, useDevice, useToggleGame } from '@/lib/hooks';
+import { followState, useDevice, useToggleGame, useToggleMute } from '@/lib/hooks';
 import { t } from '@/lib/i18n';
 import { colors } from '@/lib/theme';
 
-/** Sino para seguir o jogo. Se um dos times é favorito, mostra uma estrela (já segue automaticamente). */
+/**
+ * Botão de alertas do jogo:
+ * - sino: liga/desliga os alertas deste jogo
+ * - estrela: jogo de time favorito (avisa sozinho); tocar silencia só este jogo
+ * - sino cortado: jogo silenciado; tocar volta a avisar
+ */
 export function FollowButton({ game, size = 22 }: { game: Game; size?: number }) {
   const { data: device } = useDevice();
-  const toggle = useToggleGame();
+  const toggleGame = useToggleGame();
+  const toggleMute = useToggleMute();
   const state = followState(device, game);
   const done = game.status === 'final';
 
-  if (state === 'favorite') {
-    return (
-      <View style={styles.hit} accessibilityLabel={t('follow.favorite')}>
-        <SymbolView name="star.fill" tintColor={colors.accent} size={size} />
-      </View>
-    );
-  }
-  const on = state === 'bell';
-  if (done && !on) return null; // jogo acabou: não há mais o que avisar
+  // Jogo encerrado: só mostra o ícone se ele estava sendo acompanhado.
+  if (done && (state === 'none' || state === 'muted')) return null;
+
+  const look: Record<typeof state, { icon: SymbolViewProps['name']; color: string; label: string }> = {
+    favorite: { icon: 'star.fill', color: colors.accent, label: t('follow.favorite') },
+    muted: { icon: 'bell.slash', color: colors.muted, label: t('follow.muted') },
+    bell: { icon: 'bell.fill', color: colors.accent, label: t('follow.off') },
+    none: { icon: 'bell', color: colors.muted, label: t('follow.on') },
+  };
+
+  const onPress = () => {
+    if (state === 'favorite') toggleMute.mutate({ gameId: game.id, muted: true });
+    else if (state === 'muted') toggleMute.mutate({ gameId: game.id, muted: false });
+    else toggleGame.mutate({ gameId: game.id, on: state === 'none' });
+  };
+
   return (
     <Pressable
       hitSlop={10}
       style={styles.hit}
-      disabled={!device}
-      onPress={() => toggle.mutate({ gameId: game.id, on: !on })}
+      disabled={!device || done}
+      onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={on ? t('follow.off') : t('follow.on')}
+      accessibilityLabel={look[state].label}
     >
-      <SymbolView name={on ? 'bell.fill' : 'bell'} tintColor={on ? colors.accent : colors.muted} size={size} />
+      <SymbolView name={look[state].icon} tintColor={look[state].color} size={size} />
     </Pressable>
   );
 }

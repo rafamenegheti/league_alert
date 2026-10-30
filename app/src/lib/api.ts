@@ -34,6 +34,8 @@ export const api = {
     request<DeviceState>(`/devices/${id}/favorites`, json('PUT', { teamIds })),
   setGame: (id: string, gameId: string, on: boolean) =>
     request<DeviceState>(`/devices/${id}/games/${gameId}`, json(on ? 'PUT' : 'DELETE')),
+  setMuted: (id: string, gameId: string, muted: boolean) =>
+    request<DeviceState>(`/devices/${id}/mutes/${gameId}`, json(muted ? 'PUT' : 'DELETE')),
   setPrefs: (id: string, prefs: Partial<AlertPrefs>) =>
     request<DeviceState>(`/devices/${id}/prefs`, json('PUT', { prefs })),
   setSettings: (id: string, settings: Partial<DeviceSettings>) =>

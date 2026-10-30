@@ -64,6 +64,19 @@ export function buildApi(db: Db, games: GameService, notifier: Notifier, br?: Br
     return db.getDevice(req.params.id);
   });
 
+  // Silenciar um jogo de time favorito sem tirar o time dos favoritos.
+  app.put<{ Params: { id: string; gameId: string } }>('/devices/:id/mutes/:gameId', async (req) => {
+    requireDevice(req.params.id);
+    db.setGameMuted(req.params.id, req.params.gameId, true);
+    return db.getDevice(req.params.id);
+  });
+
+  app.delete<{ Params: { id: string; gameId: string } }>('/devices/:id/mutes/:gameId', async (req) => {
+    requireDevice(req.params.id);
+    db.setGameMuted(req.params.id, req.params.gameId, false);
+    return db.getDevice(req.params.id);
+  });
+
   app.put<{ Params: { id: string }; Body: { prefs: Partial<AlertPrefs> } }>('/devices/:id/prefs', async (req) => {
     requireDevice(req.params.id);
     db.setPrefs(req.params.id, req.body.prefs ?? {});

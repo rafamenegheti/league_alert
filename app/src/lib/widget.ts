@@ -15,7 +15,7 @@ function rank(g: Game, followed: boolean): number {
 
 export function toWidgetGames(games: Game[], device: DeviceState | undefined): WidgetGame[] {
   return games
-    .map((g) => ({ g, followed: followState(device, g) !== 'none' }))
+    .map((g) => ({ g, followed: ['bell', 'favorite'].includes(followState(device, g)) }))
     .sort((a, b) => rank(a.g, a.followed) - rank(b.g, b.followed) || a.g.startTime.localeCompare(b.g.startTime))
     .map(({ g, followed }) => ({
       id: g.id,

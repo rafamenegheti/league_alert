@@ -48,6 +48,11 @@ export class Db {
         game_id TEXT NOT NULL,
         PRIMARY KEY (device_id, game_id)
       );
+      CREATE TABLE IF NOT EXISTS game_mutes (
+        device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+        game_id TEXT NOT NULL,
+        PRIMARY KEY (device_id, game_id)
+      );
       CREATE TABLE IF NOT EXISTS sent_events (
         key TEXT PRIMARY KEY,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -86,11 +91,13 @@ export class Db {
     if (!row) return null;
     const favorites = this.db.prepare('SELECT team_id FROM favorites WHERE device_id = ?').all(id) as any[];
     const games = this.db.prepare('SELECT game_id FROM game_subs WHERE device_id = ?').all(id) as any[];
+    const muted = this.db.prepare('SELECT game_id FROM game_mutes WHERE device_id = ?').all(id) as any[];
     return {
       deviceId: row.id,
       platform: row.platform,
       favorites: favorites.map((f) => f.team_id),
       games: games.map((g) => g.game_id),
+      muted: muted.map((g) => g.game_id),
       prefs: { ...DEFAULT_PREFS, ...JSON.parse(row.prefs) },
       settings: settingsOf(row),
       lang: row.lang,
@@ -104,8 +111,18 @@ export class Db {
   }
 
   setGameSub(deviceId: string, gameId: string, on: boolean): void {
-    if (on) this.db.prepare('INSERT OR IGNORE INTO game_subs (device_id, game_id) VALUES (?, ?)').run(deviceId, gameId);
-    else this.db.prepare('DELETE FROM game_subs WHERE device_id = ? AND game_id = ?').run(deviceId, gameId);
+    if (on) {
+      this.db.prepare('INSERT OR IGNORE INTO game_subs (device_id, game_id) VALUES (?, ?)').run(deviceId, gameId);
+      this.setGameMuted(deviceId, gameId, false); // ligar o sino tira o silêncio
+    } else {
+      this.db.prepare('DELETE FROM game_subs WHERE device_id = ? AND game_id = ?').run(deviceId, gameId);
+    }
+  }
+
+  /** Silencia um jogo específico, mesmo que um dos times seja favorito. */
+  setGameMuted(deviceId: string, gameId: string, muted: boolean): void {
+    if (muted) this.db.prepare('INSERT OR IGNORE INTO game_mutes (device_id, game_id) VALUES (?, ?)').run(deviceId, gameId);
+    else this.db.prepare('DELETE FROM game_mutes WHERE device_id = ? AND game_id = ?').run(deviceId, gameId);
   }
 
   setPrefs(deviceId: string, prefs: Partial<AlertPrefs>): void {
@@ -127,15 +144,19 @@ export class Db {
     return this.db.prepare('INSERT OR IGNORE INTO sent_events (key) VALUES (?)').run(key).changes > 0;
   }
 
-  /** Aparelhos que seguem o jogo (sino) ou um dos times (favorito) e têm esse tipo de alerta ligado. */
+  /**
+   * Aparelhos que seguem o jogo (sino) ou um dos times (favorito), não silenciaram esse jogo
+   * e têm esse tipo de alerta ligado.
+   */
   recipients(gameId: string, teamIds: string[], type: AlertType): DeviceRow[] {
     const rows = this.db
       .prepare(
         `SELECT DISTINCT d.* FROM devices d
-         WHERE EXISTS (SELECT 1 FROM game_subs s WHERE s.device_id = d.id AND s.game_id = ?)
-            OR EXISTS (SELECT 1 FROM favorites f WHERE f.device_id = d.id AND f.team_id IN (?, ?))`,
+         WHERE (EXISTS (SELECT 1 FROM game_subs s WHERE s.device_id = d.id AND s.game_id = ?)
+             OR EXISTS (SELECT 1 FROM favorites f WHERE f.device_id = d.id AND f.team_id IN (?, ?)))
+           AND NOT EXISTS (SELECT 1 FROM game_mutes m WHERE m.device_id = d.id AND m.game_id = ?)`,
       )
-      .all(gameId, teamIds[0] ?? '', teamIds[1] ?? '') as any[];
+      .all(gameId, teamIds[0] ?? '', teamIds[1] ?? '', gameId) as any[];
     return rows
       .map((r) => this.toRow(r))
       .filter((d) => d.prefs[type]);

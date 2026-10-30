@@ -33,11 +33,13 @@ const pt = {
   'status.final': 'Final',
   'status.postponed': 'Adiado',
 
-  'follow.favorite': 'Time favorito: alertas ligados',
+  'follow.favorite': 'Time favorito: alertas ligados. Toque para silenciar só este jogo',
+  'follow.muted': 'Jogo silenciado. Toque para voltar a avisar',
   'follow.on': 'Ligar alertas deste jogo',
   'follow.off': 'Desligar alertas deste jogo',
 
-  'teams.hint': 'Os jogos dos times marcados com estrela mandam alertas automaticamente, sem precisar ligar o sino.',
+  'teams.hint':
+    'Os jogos dos times marcados com estrela mandam alertas automaticamente, sem precisar ligar o sino. Para pular um jogo específico, toque na estrela dele na lista de jogos.',
 
   'alerts.permissionOff': 'As notificações estão desligadas. Toque para permitir.',
   'alerts.notifyWhen': 'Avisar quando',
@@ -126,11 +128,13 @@ const en: Record<Key, string> = {
   'status.final': 'Final',
   'status.postponed': 'Postponed',
 
-  'follow.favorite': 'Favorite team: alerts on',
+  'follow.favorite': 'Favorite team: alerts on. Tap to mute just this game',
+  'follow.muted': 'Game muted. Tap to turn alerts back on',
   'follow.on': 'Turn on alerts for this game',
   'follow.off': 'Turn off alerts for this game',
 
-  'teams.hint': "Games of starred teams send alerts automatically. You don't need to turn on the bell.",
+  'teams.hint':
+    "Games of starred teams send alerts automatically. You don't need to turn on the bell. To skip a specific game, tap its star in the games list.",
 
   'alerts.permissionOff': 'Notifications are turned off. Tap to allow them.',
   'alerts.notifyWhen': 'Notify me when',
