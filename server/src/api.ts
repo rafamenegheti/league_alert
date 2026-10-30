@@ -6,6 +6,7 @@ import {
   type GamesResponse,
   type RegisterDeviceBody,
 } from '@league-alert/shared';
+import type { BrSchedule } from './brSchedule';
 import type { Db } from './db';
 import { currentGameDay } from './espn';
 import { groupByLang, type GameService } from './games';
@@ -13,7 +14,7 @@ import { testMessage } from './messages';
 import type { Notifier } from './notifier';
 import { startSimulation, type SimulationOptions } from './simulation';
 
-export function buildApi(db: Db, games: GameService, notifier: Notifier) {
+export function buildApi(db: Db, games: GameService, notifier: Notifier, br?: BrSchedule) {
   const app = Fastify({ logger: { level: 'warn' } });
 
   const requireDevice = (id: string) => {
@@ -34,11 +35,12 @@ export function buildApi(db: Db, games: GameService, notifier: Notifier) {
   app.get('/teams', async () => games.getTeams());
 
   app.post<{ Body: RegisterDeviceBody }>('/devices', async (req) => {
-    const { deviceId, platform, pushToken = null, lang } = req.body;
+    const { deviceId, platform, pushToken = null, lang, region } = req.body;
     if (!deviceId || (platform !== 'simulator' && platform !== 'ios')) {
       throw Object.assign(new Error('deviceId and platform are required'), { statusCode: 400 });
     }
-    db.registerDevice(deviceId, platform, pushToken, toLang(lang));
+    const country = typeof region === 'string' && /^[A-Za-z]{2}$/.test(region) ? region.toUpperCase() : null;
+    db.registerDevice(deviceId, platform, pushToken, toLang(lang), country);
     return db.getDevice(deviceId);
   });
 
@@ -76,6 +78,13 @@ export function buildApi(db: Db, games: GameService, notifier: Notifier) {
       return db.getDevice(req.params.id);
     },
   );
+
+  // Grade do Brasil: o que foi lido do grade-br.csv e os avisos de linhas com problema.
+  app.get('/grade-br', async () => br?.status() ?? { source: 'desligada' });
+  app.post('/grade-br/reload', async () => {
+    await br?.load();
+    return br?.status();
+  });
 
   // ---------- rotas de desenvolvimento ----------
 

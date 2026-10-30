@@ -2,13 +2,15 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Game, TeamScore } from '@league-alert/shared';
-import { isActive } from '@/lib/format';
+import { whereToWatch } from '@/lib/format';
+import { t } from '@/lib/i18n';
 import { colors } from '@/lib/theme';
 import { FollowButton } from './FollowButton';
 import { StatusPill } from './StatusPill';
 
 export function GameCard({ game }: { game: Game }) {
   const showScore = game.status !== 'scheduled' && game.status !== 'postponed';
+  const watch = whereToWatch(game);
   const winner =
     game.status === 'final' ? (game.home.score > game.away.score ? game.home.id : game.away.id) : null;
 
@@ -23,9 +25,10 @@ export function GameCard({ game }: { game: Game }) {
       </View>
       <View style={styles.side}>
         <StatusPill game={game} />
-        {!isActive(game) && game.broadcasts[0] ? (
-          <Text style={styles.broadcast} numberOfLines={1}>
-            {game.broadcasts[0]}
+        {watch && game.status !== 'final' ? (
+          <Text style={styles.broadcast} numberOfLines={2}>
+            {watch.text}
+            {watch.likely ? <Text style={styles.likely}>{` (${t('br.likely')})`}</Text> : null}
           </Text>
         ) : null}
         <FollowButton game={game} />
@@ -70,5 +73,6 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.border,
     paddingLeft: 10,
   },
-  broadcast: { color: colors.muted, fontSize: 11, textAlign: 'right' },
+  broadcast: { color: colors.text, fontSize: 11, fontWeight: '600', textAlign: 'right' },
+  likely: { color: colors.muted, fontWeight: '400' },
 });

@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AlertPrefs, DeviceSettings, DeviceState, Game } from '@league-alert/shared';
 import { api } from './api';
 import { getDeviceId, platform } from './device';
-import { lang } from './i18n';
+import { lang, region } from './i18n';
 
 const ACTIVE = new Set(['live', 'halftime', 'end_period']);
 
@@ -38,7 +38,7 @@ export function useTeams() {
 export function useDevice() {
   return useQuery({
     queryKey: ['device'],
-    queryFn: async () => api.register({ deviceId: await getDeviceId(), platform, pushToken: null, lang }),
+    queryFn: async () => api.register({ deviceId: await getDeviceId(), platform, pushToken: null, lang, region }),
     staleTime: Infinity,
     retry: true,
     retryDelay: 3000,

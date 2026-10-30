@@ -70,6 +70,24 @@ O app segue o idioma do iPhone: português (qualquer variante) ou inglês (qualq
 - Para testar em inglês no Simulador sem mudar o sistema:
   `xcrun simctl launch booted com.rafael.leaguealert -AppleLanguages "(en)"`
 
+## Onde passa no Brasil (grade semanal)
+
+Para quem está com o iPhone na região Brasil, o app mostra onde cada jogo passa e o lembrete
+pré-jogo diz o canal. Não existe API pública com a grade brasileira, então ela vem do arquivo
+[`grade-br.csv`](grade-br.csv), editado uma vez por semana:
+
+1. No GitHub, abra o `grade-br.csv` e clique no lápis (✏️ "Edit this file").
+2. Adicione uma linha por jogo: `data,visitante,mandante,canal`, por exemplo
+   `2026-11-04,LAL,BOS,Prime Video` ou `04/11,Warriors,Nuggets,ESPN 2 / Disney+`.
+3. Clique em **Commit changes**. O servidor busca o arquivo novo sozinho (em até ~15 min).
+
+Pode apagar as linhas de semanas passadas quando quiser. Para conferir o que foi lido e se alguma
+linha deu problema (time ou data não reconhecidos): `http://localhost:3000/grade-br`.
+Para recarregar na hora: `curl -X POST http://localhost:3000/grade-br/reload`.
+
+Jogo fora da grade: se a TV nacional dos EUA for ESPN/ABC ou Prime Video, o app mostra esse canal
+como **provável** (costuma coincidir); senão, mostra "NBA League Pass", que transmite todos os jogos.
+
 ## Widget
 
 Usa o `expo-widgets` (`app/src/widgets/GamesWidget.tsx`). O app envia os jogos para o widget sempre que

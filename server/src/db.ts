@@ -20,6 +20,7 @@ export interface DeviceRow {
   prefs: AlertPrefs;
   settings: DeviceSettings;
   lang: Lang;
+  region: string | null;
 }
 
 export class Db {
@@ -56,6 +57,7 @@ export class Db {
     this.addColumn('lang', `TEXT NOT NULL DEFAULT 'pt'`);
     this.addColumn('hide_scores', 'INTEGER NOT NULL DEFAULT 0');
     this.addColumn('delay_seconds', 'INTEGER NOT NULL DEFAULT 0');
+    this.addColumn('region', 'TEXT');
   }
 
   private addColumn(name: string, ddl: string): void {
@@ -63,14 +65,20 @@ export class Db {
     if (!cols.some((c) => c.name === name)) this.db.exec(`ALTER TABLE devices ADD COLUMN ${name} ${ddl}`);
   }
 
-  registerDevice(id: string, platform: Platform, pushToken: string | null, lang: Lang = 'en'): void {
+  registerDevice(
+    id: string,
+    platform: Platform,
+    pushToken: string | null,
+    lang: Lang = 'en',
+    region: string | null = null,
+  ): void {
     this.db
       .prepare(
-        `INSERT INTO devices (id, platform, push_token, prefs, lang) VALUES (?, ?, ?, ?, ?)
+        `INSERT INTO devices (id, platform, push_token, prefs, lang, region) VALUES (?, ?, ?, ?, ?, ?)
          ON CONFLICT(id) DO UPDATE SET platform = excluded.platform, push_token = excluded.push_token,
-           lang = excluded.lang`,
+           lang = excluded.lang, region = excluded.region`,
       )
-      .run(id, platform, pushToken, JSON.stringify(DEFAULT_PREFS), lang);
+      .run(id, platform, pushToken, JSON.stringify(DEFAULT_PREFS), lang, region);
   }
 
   getDevice(id: string): DeviceState | null {
@@ -145,6 +153,7 @@ export class Db {
       prefs: { ...DEFAULT_PREFS, ...JSON.parse(r.prefs) },
       settings: settingsOf(r),
       lang: r.lang,
+      region: r.region ?? null,
     };
   }
 }

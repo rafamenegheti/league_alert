@@ -1,0 +1,17 @@
+# GRADE DO BRASIL: onde cada jogo passa
+#
+# Uma linha por jogo: data,visitante,mandante,canal
+#
+# - data: 2026-10-31, 31/10/2026 ou 31/10 (pode ser a data do Brasil ou a dos EUA)
+# - times: sigla (LAL, BOS, GS, NY, GSW, NYK...) ou apelido (Lakers, Celtics, Warriors...)
+# - canal: o texto que vai aparecer no app, ex.: Prime Video, ESPN 2 / Disney+
+#   (não use vírgula dentro do canal; separe com / ou +)
+# - linhas que começam com # são ignoradas
+#
+# Jogo que não estiver aqui aparece como palpite (pela TV dos EUA) ou "NBA League Pass".
+# Depois de salvar no GitHub, o app atualiza em até ~15 minutos.
+# Para ver se alguma linha deu problema: http://localhost:3000/grade-br
+#
+data,visitante,mandante,canal
+2026-10-21,MIN,MIA,ESPN 2 / Disney+
+2026-10-23,NY,BOS,Prime Video

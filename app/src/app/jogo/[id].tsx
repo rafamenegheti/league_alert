@@ -4,6 +4,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { FollowButton } from '@/components/FollowButton';
 import { StatusPill } from '@/components/StatusPill';
+import { whereToWatch } from '@/lib/format';
 import { useGame } from '@/lib/hooks';
 import { lang, t } from '@/lib/i18n';
 import { colors } from '@/lib/theme';
@@ -17,6 +18,7 @@ export default function GameScreen() {
 
   const { game, plays, players } = data;
   const showScore = game.status !== 'scheduled' && game.status !== 'postponed';
+  const watch = whereToWatch(game);
 
   return (
     <>
@@ -44,7 +46,12 @@ export default function GameScreen() {
           <TeamBlock team={game.home} />
         </View>
 
-        {game.broadcasts.length ? <Text style={styles.broadcast}>{game.broadcasts.join(' · ')}</Text> : null}
+        {watch ? (
+          <Text style={styles.broadcast}>
+            📺 {watch.text}
+            {watch.likely ? ` (${t('br.likely')})` : ''}
+          </Text>
+        ) : null}
 
         {game.home.linescores.length ? <LineScore game={game} /> : null}
 

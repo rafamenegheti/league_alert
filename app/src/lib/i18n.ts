@@ -6,6 +6,9 @@ import { getLocales } from 'expo-localization';
 
 const device = getLocales()[0];
 export const lang: Lang = toLang(device?.languageCode);
+/** País do aparelho (Ajustes → Geral → Idioma e Região), ex.: "BR". */
+export const region: string | null = device?.regionCode ?? null;
+export const inBrazil = region === 'BR';
 /** Locale para datas e horários, ex.: "pt-BR", "en-US". */
 export const locale = device?.languageTag ?? (lang === 'pt' ? 'pt-BR' : 'en-US');
 
@@ -89,6 +92,7 @@ const pt = {
   'settings.delay.desc': 'Segura os avisos para chegarem junto com a sua transmissão.',
   'settings.delay.none': 'Sem',
   'game.boxScore': 'Estatísticas',
+  'br.likely': 'provável',
   'game.player': 'Jogador',
   'game.min': 'MIN',
   'game.pts': 'PTS',
@@ -181,6 +185,7 @@ const en: Record<Key, string> = {
   'settings.delay.desc': 'Holds alerts so they arrive in sync with your stream.',
   'settings.delay.none': 'None',
   'game.boxScore': 'Box score',
+  'br.likely': 'likely',
   'game.player': 'Player',
   'game.min': 'MIN',
   'game.pts': 'PTS',

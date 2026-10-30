@@ -9,6 +9,7 @@ export interface Message {
 
 export interface MessageOptions {
   hideScores?: boolean;
+  region?: string | null; // "BR": o lembrete diz onde o jogo passa no Brasil
 }
 
 /** "GS 100 x 97 NY" (pt) / "GS 100 – 97 NY" (en) */
@@ -32,8 +33,20 @@ export function buildMessage(ev: DetectedEvent, g: Game, lang: Lang, opts: Messa
   const when = pt ? `${clock} no ${periodLabel(period, lang)}` : `${clock} left in the ${periodLabel(period, lang)}`;
 
   switch (ev.type) {
-    case 'game_soon':
-      return { title: `⏰ ${matchup(g, lang)}`, body: pt ? 'O jogo começa em 15 minutos.' : 'Tip-off in 15 minutes.' };
+    case 'game_soon': {
+      const base = pt ? 'O jogo começa em 15 minutos' : 'Tip-off in 15 minutes';
+      const br = opts.region === 'BR' ? g.br : undefined;
+      const where = !br
+        ? ''
+        : br.source === 'suggested'
+          ? pt
+            ? ` (provavelmente no ${br.channel})`
+            : ` (likely on ${br.channel})`
+          : pt
+            ? `, no ${br.channel}`
+            : ` on ${br.channel}`;
+      return { title: `⏰ ${matchup(g, lang)}`, body: `${base}${where}.` };
+    }
     case 'game_start':
       return { title, body: pt ? 'O jogo começou!' : 'Tip-off! The game has started.' };
     case 'halftime_soon':

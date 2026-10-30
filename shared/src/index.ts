@@ -32,8 +32,20 @@ export interface Game {
   clockSeconds: number;
   home: TeamScore;
   away: TeamScore;
-  broadcasts: string[];
+  broadcasts: string[]; // transmissões dos EUA (da ESPN)
+  br?: BrBroadcast; // onde passa no Brasil
   simulated?: boolean;
+}
+
+/**
+ * Onde o jogo passa no Brasil.
+ * - grade: confirmado no arquivo grade-br.csv
+ * - suggested: palpite pela TV nacional dos EUA (ESPN → ESPN/Disney+, Prime → Prime Video)
+ * - league_pass: sem informação; todos os jogos passam no NBA League Pass
+ */
+export interface BrBroadcast {
+  channel: string;
+  source: 'grade' | 'suggested' | 'league_pass';
 }
 
 export interface Play {
@@ -139,6 +151,7 @@ export interface RegisterDeviceBody {
   platform: Platform;
   pushToken?: string | null;
   lang?: Lang;
+  region?: string | null; // país do aparelho, ex.: "BR"
 }
 
 export interface GamesResponse {

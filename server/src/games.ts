@@ -1,5 +1,6 @@
 // Guarda o estado dos jogos, acompanha os jogos ao vivo e dispara as notificações.
 import type { Game, GameDetail, Lang, Play, PlayerLine, Team } from '@league-alert/shared';
+import { BrSchedule } from './brSchedule';
 import type { Db, DeviceRow } from './db';
 import { detectEvents, detectTimeoutEnd, type DetectedEvent, type PendingTimeout } from './detector';
 import { currentGameDay, fetchScoreboard, fetchSummary, fetchTeams } from './espn';
@@ -45,7 +46,11 @@ export class GameService {
   constructor(
     private db: Db,
     private notifier: Notifier,
+    private br = new BrSchedule(),
   ) {}
+
+  /** Acrescenta onde o jogo passa no Brasil. */
+  private withBr = (g: Game): Game => ({ ...g, br: this.br.lookup(g) });
 
   // ---------- leitura (usada pela API) ----------
 
@@ -57,18 +62,20 @@ export class GameService {
       this.scoreboards.set(date, { value: games, at: Date.now() });
     }
     const sims = date === currentGameDay() ? [...this.simulated.values()].map((d) => d.game) : [];
-    return [...sims, ...games].sort((a, b) => a.startTime.localeCompare(b.startTime));
+    return [...sims, ...games].map(this.withBr).sort((a, b) => a.startTime.localeCompare(b.startTime));
   }
 
   async getDetail(id: string): Promise<GameDetail> {
     const sim = this.simulated.get(id);
-    if (sim) return sim;
+    if (sim) return { ...sim, game: this.withBr(sim.game) };
     const cached = this.details.get(id);
-    if (cached && Date.now() - cached.at < CACHE_MS) return cached.value;
+    if (cached && Date.now() - cached.at < CACHE_MS) return { ...cached.value, game: this.withBr(cached.value.game) };
     const { game, plays, players } = await fetchSummary(id);
-    const detail = { game, plays: plays.slice(0, MAX_PLAYS), players };
+    // O resumo não traz as transmissões; aproveita as do placar do dia, se já estiver em cache.
+    const fromBoard = [...this.scoreboards.values()].flatMap((c) => c.value).find((g) => g.id === id);
+    const detail = { game: { ...game, broadcasts: fromBoard?.broadcasts ?? game.broadcasts }, plays: plays.slice(0, MAX_PLAYS), players };
     this.details.set(id, { value: detail, at: Date.now() });
-    return detail;
+    return { ...detail, game: this.withBr(detail.game) };
   }
 
   async getTeams(): Promise<Team[]> {
@@ -129,7 +136,8 @@ export class GameService {
   }
 
   /** Compara com o estado anterior, detecta eventos e envia. Usado também pela simulação. */
-  async process(game: Game, plays?: Play[], players?: PlayerLine[], now = Date.now()): Promise<DetectedEvent[]> {
+  async process(rawGame: Game, plays?: Play[], players?: PlayerLine[], now = Date.now()): Promise<DetectedEvent[]> {
+    const game = this.withBr(rawGame);
     const id = game.id;
     const prev = this.prev.get(id);
     const newPlays = plays ? this.takeNewPlays(id, plays) : [];
@@ -187,12 +195,12 @@ export class GameService {
     console.log(`[evento] ${ev.key} → ${devices.length} aparelho(s)`);
 
     // Um envio por combinação de idioma, modo sem spoiler e atraso do stream.
-    const groups = groupBy(devices, (d) => `${d.lang}|${d.settings.hideScores}|${d.settings.delaySeconds}`);
+    const groups = groupBy(devices, (d) => `${d.lang}|${d.region}|${d.settings.hideScores}|${d.settings.delaySeconds}`);
     for (const group of groups.values()) {
-      const { lang, settings } = group[0];
+      const { lang, region, settings } = group[0];
       const send = () =>
         this.notifier.send(group, {
-          ...buildMessage(ev, game, lang, { hideScores: settings.hideScores }),
+          ...buildMessage(ev, game, lang, { hideScores: settings.hideScores, region }),
           data: { gameId: game.id, alertType: ev.type },
         });
       // Com atraso, o texto continua com o placar do momento do evento (o que o stream vai mostrar).

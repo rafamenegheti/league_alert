@@ -1,5 +1,5 @@
 import { periodShort, type Game } from '@league-alert/shared';
-import { lang, locale, t } from './i18n';
+import { inBrazil, lang, locale, t } from './i18n';
 
 export function startTime(iso: string): string {
   return new Date(iso).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
@@ -21,6 +21,12 @@ export function statusText(g: Game): string {
     case 'postponed':
       return t('status.postponed');
   }
+}
+
+/** Onde assistir: no Brasil, o canal da grade (ou o palpite); fora, a TV dos EUA. */
+export function whereToWatch(g: Game): { text: string; likely: boolean } | null {
+  if (inBrazil && g.br) return { text: g.br.channel, likely: g.br.source === 'suggested' };
+  return g.broadcasts[0] ? { text: g.broadcasts.join(' · '), likely: false } : null;
 }
 
 export const isActive = (g: Game) => g.status === 'live' || g.status === 'halftime' || g.status === 'end_period';
