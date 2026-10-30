@@ -6,6 +6,7 @@ import { API_URL } from '@/lib/api';
 import { addDays, dayLabel } from '@/lib/format';
 import { useDevice, useGames } from '@/lib/hooks';
 import { t } from '@/lib/i18n';
+import { useSupportPrompt } from '@/lib/support';
 import { useGamesWidget } from '@/lib/widget';
 import { colors } from '@/lib/theme';
 
@@ -15,6 +16,7 @@ export default function GamesScreen() {
   const today = todayQuery.data?.date;
   const { data: device } = useDevice();
   useGamesWidget(todayQuery.data?.games, device);
+  useSupportPrompt(todayQuery.data?.games, device);
   const { data, isLoading, error, refetch, isRefetching } = useGames(date);
   const shown = date ?? today;
 

@@ -103,6 +103,32 @@ const pt = {
   'game.loadError': 'Não foi possível carregar o jogo.',
   'game.latestPlays': 'Últimos lances',
   'game.total': 'T',
+
+  'support.title': 'Apoie o League Alert',
+  'support.row.desc': 'Ajude a manter o app e o servidor no ar',
+  'support.row.thanks': 'Obrigado pelo apoio! Dá para apoiar de novo quando quiser.',
+  'support.intro':
+    'O League Alert é feito por uma pessoa só, sem anúncios e sem assinatura. Se ele te ajuda a não perder a volta do jogo, escolha um valor para ajudar a pagar o servidor e as próximas novidades.',
+  'support.tier.5': 'Lance livre',
+  'support.tier.10': 'Bandeja',
+  'support.tier.25': 'Bola de 3',
+  'support.tier.50': 'Enterrada',
+  'support.tier.100': 'Triplo-duplo',
+  'support.tier.200': 'MVP',
+  'support.note': 'Pagamento único pela Apple. Não é assinatura e não libera nada extra: o app continua igual para todo mundo.',
+  'support.loading': 'Carregando valores…',
+  'support.unavailable': 'As compras não estão disponíveis agora. Tente de novo mais tarde.',
+  'support.error': 'Não deu certo',
+  'support.thanks.title': 'Valeu demais! 🏀',
+  'support.thanks.text': 'Seu apoio ajuda o League Alert a continuar no ar. Bons jogos!',
+  'support.close': 'Fechar',
+  'support.prompt.title': 'Curtindo o League Alert?',
+  'support.prompt.text':
+    'O app é feito por uma pessoa só, sem anúncios. Se ele te ajudou a voltar para o jogo na hora certa, que tal apoiar com qualquer valor?',
+  'support.prompt.yes': 'Quero apoiar',
+  'support.prompt.later': 'Agora não',
+  'support.prompt.never': 'Não perguntar mais',
+  'support.preview': 'Mostrar o pedido de apoio',
 };
 
 type Key = keyof typeof pt;
@@ -198,6 +224,32 @@ const en: Record<Key, string> = {
   'game.loadError': "Couldn't load this game.",
   'game.latestPlays': 'Latest plays',
   'game.total': 'T',
+
+  'support.title': 'Support League Alert',
+  'support.row.desc': 'Help keep the app and its server running',
+  'support.row.thanks': 'Thanks for your support! You can chip in again anytime.',
+  'support.intro':
+    "League Alert is made by one person, with no ads and no subscription. If it helps you catch the game when it's back, pick an amount to help pay for the server and what comes next.",
+  'support.tier.5': 'Free throw',
+  'support.tier.10': 'Layup',
+  'support.tier.25': 'Three-pointer',
+  'support.tier.50': 'Slam dunk',
+  'support.tier.100': 'Triple-double',
+  'support.tier.200': 'MVP',
+  'support.note': "One-time payment through Apple. It's not a subscription and unlocks nothing: the app stays the same for everyone.",
+  'support.loading': 'Loading amounts…',
+  'support.unavailable': 'Purchases are not available right now. Please try again later.',
+  'support.error': 'Something went wrong',
+  'support.thanks.title': 'Thank you! 🏀',
+  'support.thanks.text': 'Your support keeps League Alert running. Enjoy the games!',
+  'support.close': 'Close',
+  'support.prompt.title': 'Enjoying League Alert?',
+  'support.prompt.text':
+    "The app is made by one person, with no ads. If it helped you get back to the game right on time, how about chipping in any amount?",
+  'support.prompt.yes': 'I want to help',
+  'support.prompt.later': 'Not now',
+  'support.prompt.never': "Don't ask again",
+  'support.preview': 'Show the support request',
 };
 
 const dict: Record<Lang, Record<Key, string>> = { pt, en };
@@ -211,3 +263,4 @@ export function t(key: Key, params?: Record<string, string | number>): string {
 
 export const alertLabel = (type: AlertType) => t(`alert.${type}` as Key);
 export const alertDescription = (type: AlertType) => t(`alert.${type}.desc` as Key);
+export const supportTierName = (amount: number) => t(`support.tier.${amount}` as Key);

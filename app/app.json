@@ -78,7 +78,9 @@
             }
           ]
         }
-      ]
+      ],
+      "expo-iap",
+      "./plugins/withStoreKitConfig"
     ],
     "experiments": {
       "typedRoutes": true

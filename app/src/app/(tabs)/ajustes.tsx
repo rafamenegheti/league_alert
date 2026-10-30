@@ -1,5 +1,7 @@
 import { ALERT_GROUPS, DELAY_OPTIONS } from '@league-alert/shared';
 import * as Notifications from 'expo-notifications';
+import { router } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { API_URL, api } from '@/lib/api';
@@ -7,6 +9,7 @@ import { platform } from '@/lib/device';
 import { useDevice, useSetPrefs, useSetSettings } from '@/lib/hooks';
 import { alertDescription, alertLabel, t } from '@/lib/i18n';
 import { ensurePermission } from '@/lib/notifications';
+import { supportActions, useSupportState } from '@/lib/support';
 import { colors } from '@/lib/theme';
 
 export default function AlertsScreen() {
@@ -14,6 +17,7 @@ export default function AlertsScreen() {
   const setPrefs = useSetPrefs();
   const setSettings = useSetSettings();
   const [permission, setPermission] = useState<boolean | null>(null);
+  const support = useSupportState();
 
   useEffect(() => {
     Notifications.getPermissionsAsync().then((p) => setPermission(p.granted));
@@ -43,6 +47,19 @@ export default function AlertsScreen() {
           <Text style={styles.warningText}>{t('alerts.permissionOff')}</Text>
         </Pressable>
       ) : null}
+
+      <Pressable
+        onPress={() => router.push('/apoiar')}
+        style={({ pressed }) => [styles.group, styles.row, styles.supportCard, pressed && { backgroundColor: colors.cardPressed }]}
+        accessibilityRole="button"
+      >
+        <SymbolView name="heart.fill" tintColor={colors.accent} size={24} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>{t('support.title')}</Text>
+          <Text style={styles.desc}>{support?.supportedAt ? t('support.row.thanks') : t('support.row.desc')}</Text>
+        </View>
+        <SymbolView name="chevron.right" tintColor={colors.muted} size={14} />
+      </Pressable>
 
       <Text style={styles.section}>{t('settings.title')}</Text>
       <View style={styles.group}>
@@ -124,6 +141,7 @@ export default function AlertsScreen() {
             })
           }
         />
+        {__DEV__ ? <Button border label={t('support.preview')} onPress={supportActions.preview} /> : null}
       </View>
 
       <Text style={styles.footer}>
@@ -161,6 +179,7 @@ const styles = StyleSheet.create({
   chipText: { color: colors.text, fontSize: 14, fontVariant: ['tabular-nums'] },
   chipTextOn: { color: colors.bg, fontWeight: '700' },
   button: { color: colors.accent, fontSize: 16 },
+  supportCard: { marginTop: 4 },
   warning: { backgroundColor: '#3A1D10', borderRadius: 12, padding: 14 },
   warningText: { color: colors.accent, fontSize: 15 },
   footer: { color: colors.muted, fontSize: 12, marginTop: 24, textAlign: 'center', lineHeight: 18 },

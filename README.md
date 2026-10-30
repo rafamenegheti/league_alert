@@ -94,6 +94,28 @@ Usa o `expo-widgets` (`app/src/widgets/GamesWidget.tsx`). O app envia os jogos p
 atualiza a lista; com o app fechado, o widget mostra a última atualização (o horário aparece no canto).
 No iPhone de verdade o widget precisa de App Group, que exige a conta Apple Developer paga.
 
+## Apoio ao app (compras dentro do app)
+
+Aba Alertas → **Apoie o League Alert**: 6 valores (R$ 4,90 a R$ 199,90), compra única pela Apple,
+pode apoiar quantas vezes quiser e não libera nada extra. A Apple exige compra dentro do app para
+"gorjeta ao desenvolvedor", por isso os valores são fixos.
+
+O app também pede apoio de vez em quando, com regras em `app/src/lib/supportRules.ts`:
+só depois de 7 dias e 10 aberturas, logo depois do fim de um jogo acompanhado (nunca com jogo dele
+ao vivo), no máximo 1 vez a cada 30 dias (90 dias depois de dois "Agora não"), e nunca mais depois
+de "Não perguntar mais" ou de um apoio. Em desenvolvimento, Alertas → "Mostrar o pedido de apoio"
+abre o pedido na hora.
+
+**Testar compras no Simulador (sem conta paga, sem cobrar):** os produtos de teste ficam em
+`app/storekit/LeagueAlert.storekit` e o plugin `app/plugins/withStoreKitConfig.js` liga esse arquivo ao
+scheme. Só funciona abrindo pelo Xcode: abra `app/ios/LeagueAlert.xcworkspace` e aperte ▶ (Cmd+R)
+com o Metro rodando (`npm start -w app`). Pelo `expo run:ios` a tela mostra "compras indisponíveis".
+As compras de teste aparecem no Xcode em Debug → StoreKit → Manage Transactions.
+
+**Quando tiver a conta Apple paga:** no App Store Connect, aceite o contrato de apps pagos, entre no
+App Store Small Business Program (comissão de 15%) e crie 6 compras do tipo **Consumível** com os
+mesmos IDs (`com.rafael.leaguealert.apoio.5`, `.10`, `.25`, `.50`, `.100`, `.200`) e os preços acima.
+
 ## Fonte dos dados
 
 API pública (não oficial) da ESPN. Todo o parse fica em `server/src/espn.ts`.

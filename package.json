@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "server": "npm run dev -w server",
-    "test": "npm test -w server",
+    "test": "npm test -w server && npm test -w app",
     "typecheck": "npm run typecheck -w server && npm run typecheck -w app"
   }
 }

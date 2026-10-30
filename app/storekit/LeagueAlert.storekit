@@ -1,0 +1,137 @@
+{
+  "identifier": "4C1F3A2B",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "4.90",
+      "familyShareable": false,
+      "internalID": "6740000001",
+      "localizations": [
+        {
+          "description": "Apoio ao League Alert",
+          "displayName": "Lance livre",
+          "locale": "pt_BR"
+        },
+        {
+          "description": "Support League Alert",
+          "displayName": "Free throw",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.rafael.leaguealert.apoio.5",
+      "referenceName": "Apoio 5",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "9.90",
+      "familyShareable": false,
+      "internalID": "6740000002",
+      "localizations": [
+        {
+          "description": "Apoio ao League Alert",
+          "displayName": "Bandeja",
+          "locale": "pt_BR"
+        },
+        {
+          "description": "Support League Alert",
+          "displayName": "Layup",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.rafael.leaguealert.apoio.10",
+      "referenceName": "Apoio 10",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "24.90",
+      "familyShareable": false,
+      "internalID": "6740000003",
+      "localizations": [
+        {
+          "description": "Apoio ao League Alert",
+          "displayName": "Bola de 3",
+          "locale": "pt_BR"
+        },
+        {
+          "description": "Support League Alert",
+          "displayName": "Three-pointer",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.rafael.leaguealert.apoio.25",
+      "referenceName": "Apoio 25",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "49.90",
+      "familyShareable": false,
+      "internalID": "6740000004",
+      "localizations": [
+        {
+          "description": "Apoio ao League Alert",
+          "displayName": "Enterrada",
+          "locale": "pt_BR"
+        },
+        {
+          "description": "Support League Alert",
+          "displayName": "Slam dunk",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.rafael.leaguealert.apoio.50",
+      "referenceName": "Apoio 50",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "99.90",
+      "familyShareable": false,
+      "internalID": "6740000005",
+      "localizations": [
+        {
+          "description": "Apoio ao League Alert",
+          "displayName": "Triplo-duplo",
+          "locale": "pt_BR"
+        },
+        {
+          "description": "Support League Alert",
+          "displayName": "Triple-double",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.rafael.leaguealert.apoio.100",
+      "referenceName": "Apoio 100",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "199.90",
+      "familyShareable": false,
+      "internalID": "6740000006",
+      "localizations": [
+        {
+          "description": "Apoio ao League Alert",
+          "displayName": "MVP",
+          "locale": "pt_BR"
+        },
+        {
+          "description": "Support League Alert",
+          "displayName": "MVP",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.rafael.leaguealert.apoio.200",
+      "referenceName": "Apoio 200",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "pt_BR",
+    "_storefront": "BRA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
+  }
+}
