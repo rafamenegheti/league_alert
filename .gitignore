@@ -1,0 +1,17 @@
+node_modules/
+.DS_Store
+*.log
+
+# servidor
+server/data/
+server/recordings/
+
+# app (Expo)
+app/.expo/
+app/ios/
+app/android/
+app/dist/
+app/web-build/
+
+# configurações locais do Claude Code
+.claude/settings.local.json

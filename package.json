@@ -1,0 +1,14 @@
+{
+  "name": "league-alert",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "server",
+    "app"
+  ],
+  "scripts": {
+    "server": "npm run dev -w server",
+    "test": "npm test -w server",
+    "typecheck": "npm run typecheck -w server && npm run typecheck -w app"
+  }
+}
