@@ -4,13 +4,17 @@ import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Tex
 import { GameCard } from '@/components/GameCard';
 import { API_URL } from '@/lib/api';
 import { addDays, dayLabel } from '@/lib/format';
-import { useGames } from '@/lib/hooks';
+import { useDevice, useGames } from '@/lib/hooks';
 import { t } from '@/lib/i18n';
+import { useGamesWidget } from '@/lib/widget';
 import { colors } from '@/lib/theme';
 
 export default function GamesScreen() {
   const [date, setDate] = useState<string | null>(null); // null = hoje
-  const today = useGames(null).data?.date;
+  const todayQuery = useGames(null);
+  const today = todayQuery.data?.date;
+  const { data: device } = useDevice();
+  useGamesWidget(todayQuery.data?.games, device);
   const { data, isLoading, error, refetch, isRefetching } = useGames(date);
   const shown = date ?? today;
 

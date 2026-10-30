@@ -4,8 +4,10 @@ import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import {
   DEFAULT_PREFS,
+  DEFAULT_SETTINGS,
   type AlertPrefs,
   type AlertType,
+  type DeviceSettings,
   type DeviceState,
   type Lang,
   type Platform,
@@ -16,6 +18,7 @@ export interface DeviceRow {
   platform: Platform;
   pushToken: string | null;
   prefs: AlertPrefs;
+  settings: DeviceSettings;
   lang: Lang;
 }
 
@@ -49,11 +52,15 @@ export class Db {
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
     `);
-    // Migração: coluna de idioma (bancos criados antes dela).
+    // Migrações: colunas adicionadas depois da primeira versão.
+    this.addColumn('lang', `TEXT NOT NULL DEFAULT 'pt'`);
+    this.addColumn('hide_scores', 'INTEGER NOT NULL DEFAULT 0');
+    this.addColumn('delay_seconds', 'INTEGER NOT NULL DEFAULT 0');
+  }
+
+  private addColumn(name: string, ddl: string): void {
     const cols = this.db.prepare('PRAGMA table_info(devices)').all() as any[];
-    if (!cols.some((c) => c.name === 'lang')) {
-      this.db.exec(`ALTER TABLE devices ADD COLUMN lang TEXT NOT NULL DEFAULT 'pt'`);
-    }
+    if (!cols.some((c) => c.name === name)) this.db.exec(`ALTER TABLE devices ADD COLUMN ${name} ${ddl}`);
   }
 
   registerDevice(id: string, platform: Platform, pushToken: string | null, lang: Lang = 'en'): void {
@@ -77,6 +84,7 @@ export class Db {
       favorites: favorites.map((f) => f.team_id),
       games: games.map((g) => g.game_id),
       prefs: { ...DEFAULT_PREFS, ...JSON.parse(row.prefs) },
+      settings: settingsOf(row),
       lang: row.lang,
     };
   }
@@ -95,6 +103,15 @@ export class Db {
   setPrefs(deviceId: string, prefs: Partial<AlertPrefs>): void {
     const current = this.getDevice(deviceId)?.prefs ?? DEFAULT_PREFS;
     this.db.prepare('UPDATE devices SET prefs = ? WHERE id = ?').run(JSON.stringify({ ...current, ...prefs }), deviceId);
+  }
+
+  setSettings(deviceId: string, s: Partial<DeviceSettings>): void {
+    const current = this.getDevice(deviceId)?.settings ?? DEFAULT_SETTINGS;
+    const next = { ...current, ...s };
+    const delay = Math.max(0, Math.min(300, Math.round(Number(next.delaySeconds) || 0)));
+    this.db
+      .prepare('UPDATE devices SET hide_scores = ?, delay_seconds = ? WHERE id = ?')
+      .run(next.hideScores ? 1 : 0, delay, deviceId);
   }
 
   /** Marca o evento como enviado. Retorna false se ele já tinha sido enviado antes. */
@@ -126,7 +143,12 @@ export class Db {
       platform: r.platform,
       pushToken: r.push_token,
       prefs: { ...DEFAULT_PREFS, ...JSON.parse(r.prefs) },
+      settings: settingsOf(r),
       lang: r.lang,
     };
   }
+}
+
+function settingsOf(row: any): DeviceSettings {
+  return { hideScores: Boolean(row.hide_scores), delaySeconds: Number(row.delay_seconds ?? 0) };
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Game } from '@league-alert/shared';
 import { Db } from '../src/db';
 import { GameService } from '../src/games';
@@ -31,6 +31,8 @@ function setup() {
   db.setFavorites('fã', ['13']);
   return { db, notifier, service };
 }
+
+afterEach(() => vi.useRealTimers());
 
 describe('GameService.process', () => {
   it('envia só para quem segue o jogo ou o time', async () => {
@@ -71,6 +73,26 @@ describe('GameService.process', () => {
       'Fim do intervalo: o 3º quarto começou!': ['fã'],
       'Halftime is over: the 3rd quarter has started!': ['sino'],
     });
+  });
+
+  it('modo sem spoiler: o título vai sem placar só para quem pediu', async () => {
+    const { db, notifier, service } = setup();
+    db.setSettings('fã', { hideScores: true });
+    await service.process(g('halftime', 2, 0));
+    await service.process(g('live', 3, 700));
+    const byTitle = Object.fromEntries(notifier.sent.map((s) => [s.msg.title, s.to]));
+    expect(byTitle).toEqual({ '🏀 LAL @ BOS': ['fã'], '🏀 LAL 0 – 0 BOS': ['sino'] });
+  });
+
+  it('atraso do stream: segura o push pelo tempo configurado', async () => {
+    vi.useFakeTimers();
+    const { db, notifier, service } = setup();
+    db.setSettings('fã', { delaySeconds: 30 });
+    await service.process(g('halftime', 2, 0));
+    await service.process(g('live', 3, 700));
+    expect(notifier.sent.map((s) => s.to)).toEqual([['sino']]); // o outro ainda não
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(notifier.sent.map((s) => s.to)).toEqual([['sino'], ['fã']]);
   });
 
   it('ejeção só para lances novos', async () => {

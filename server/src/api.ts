@@ -1,5 +1,11 @@
 import Fastify from 'fastify';
-import { toLang, type AlertPrefs, type GamesResponse, type RegisterDeviceBody } from '@league-alert/shared';
+import {
+  toLang,
+  type AlertPrefs,
+  type DeviceSettings,
+  type GamesResponse,
+  type RegisterDeviceBody,
+} from '@league-alert/shared';
 import type { Db } from './db';
 import { currentGameDay } from './espn';
 import { groupByLang, type GameService } from './games';
@@ -61,6 +67,15 @@ export function buildApi(db: Db, games: GameService, notifier: Notifier) {
     db.setPrefs(req.params.id, req.body.prefs ?? {});
     return db.getDevice(req.params.id);
   });
+
+  app.put<{ Params: { id: string }; Body: { settings: Partial<DeviceSettings> } }>(
+    '/devices/:id/settings',
+    async (req) => {
+      requireDevice(req.params.id);
+      db.setSettings(req.params.id, req.body.settings ?? {});
+      return db.getDevice(req.params.id);
+    },
+  );
 
   // ---------- rotas de desenvolvimento ----------
 

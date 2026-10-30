@@ -1,5 +1,6 @@
 import type {
   AlertPrefs,
+  DeviceSettings,
   DeviceState,
   GameDetail,
   GamesResponse,
@@ -35,6 +36,8 @@ export const api = {
     request<DeviceState>(`/devices/${id}/games/${gameId}`, json(on ? 'PUT' : 'DELETE')),
   setPrefs: (id: string, prefs: Partial<AlertPrefs>) =>
     request<DeviceState>(`/devices/${id}/prefs`, json('PUT', { prefs })),
+  setSettings: (id: string, settings: Partial<DeviceSettings>) =>
+    request<DeviceState>(`/devices/${id}/settings`, json('PUT', { settings })),
   testPush: (deviceId: string) => request<{ sentTo: number }>('/dev/test-push', json('POST', { deviceId })),
   simulate: () => request<{ gameId: string; matchup: string }>('/dev/simulate', json('POST', {})),
 };

@@ -1,6 +1,6 @@
 // Cliente da API pública (não oficial) da ESPN. Todo o parse fica aqui,
 // para que uma mudança no formato da ESPN afete um arquivo só.
-import type { Game, GameStatus, Play, Team, TeamScore } from '@league-alert/shared';
+import type { Game, GameStatus, Play, PlayerLine, Team, TeamScore } from '@league-alert/shared';
 
 const BASE = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba';
 
@@ -15,7 +15,13 @@ export async function fetchScoreboard(date: string): Promise<Game[]> {
   return parseScoreboard(data);
 }
 
-export async function fetchSummary(gameId: string): Promise<{ game: Game; plays: Play[] }> {
+export interface Summary {
+  game: Game;
+  plays: Play[];
+  players: PlayerLine[];
+}
+
+export async function fetchSummary(gameId: string): Promise<Summary> {
   const data = await getJson(`${BASE}/summary?event=${gameId}`);
   return parseSummary(data);
 }
@@ -34,11 +40,43 @@ export function parseScoreboard(data: any): Game[] {
   return (data?.events ?? []).map((e: any) => parseCompetition(e.id, e.competitions[0], e.status ?? e.competitions[0].status));
 }
 
-export function parseSummary(data: any): { game: Game; plays: Play[] } {
+export function parseSummary(data: any): Summary {
   const comp = data.header.competitions[0];
   const game = parseCompetition(data.header.id ?? comp.id, comp, comp.status);
   const plays: Play[] = (data.plays ?? []).map(parsePlay).reverse();
-  return { game, plays };
+  return { game, plays, players: parsePlayers(data.boxscore) };
+}
+
+/** Box score: uma linha por jogador, dos dois times. */
+export function parsePlayers(boxscore: any): PlayerLine[] {
+  const out: PlayerLine[] = [];
+  for (const team of boxscore?.players ?? []) {
+    const block = team.statistics?.[0];
+    if (!block) continue;
+    const labels: string[] = block.names ?? block.labels ?? [];
+    for (const a of block.athletes ?? []) {
+      const stat = (label: string) => a.stats?.[labels.indexOf(label)] ?? '';
+      const num = (label: string) => Number(stat(label)) || 0;
+      out.push({
+        id: String(a.athlete?.id),
+        name: a.athlete?.displayName ?? '',
+        shortName: a.athlete?.shortName ?? a.athlete?.displayName ?? '',
+        teamId: String(team.team?.id),
+        starter: Boolean(a.starter),
+        played: !a.didNotPlay && (a.stats?.length ?? 0) > 0,
+        min: num('MIN'),
+        pts: num('PTS'),
+        reb: num('REB'),
+        ast: num('AST'),
+        stl: num('STL'),
+        blk: num('BLK'),
+        fg: stat('FG'),
+        threes: stat('3PT'),
+        ft: stat('FT'),
+      });
+    }
+  }
+  return out;
 }
 
 function parseCompetition(id: string, comp: any, status: any): Game {
@@ -102,6 +140,7 @@ function parsePlay(p: any): Play {
     awayScore: Number(p.awayScore ?? 0),
     scoring: Boolean(p.scoringPlay),
     teamId: p.team?.id ? String(p.team.id) : undefined,
+    kind: p.type?.text,
   };
 }
 

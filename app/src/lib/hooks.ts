@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { AlertPrefs, DeviceState, Game } from '@league-alert/shared';
+import type { AlertPrefs, DeviceSettings, DeviceState, Game } from '@league-alert/shared';
 import { api } from './api';
 import { getDeviceId, platform } from './device';
 import { lang } from './i18n';
@@ -86,6 +86,13 @@ export function useSetPrefs() {
   return useDeviceMutation<Partial<AlertPrefs>>(
     (d, prefs) => api.setPrefs(d.deviceId, prefs),
     (d, prefs) => ({ ...d, prefs: { ...d.prefs, ...prefs } }),
+  );
+}
+
+export function useSetSettings() {
+  return useDeviceMutation<Partial<DeviceSettings>>(
+    (d, settings) => api.setSettings(d.deviceId, settings),
+    (d, settings) => ({ ...d, settings: { ...d.settings, ...settings } }),
   );
 }
 

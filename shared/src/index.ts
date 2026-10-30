@@ -45,44 +45,75 @@ export interface Play {
   awayScore: number;
   scoring: boolean;
   teamId?: string;
+  kind?: string; // tipo do lance na ESPN, ex.: "Full Timeout", "Substitution", "Jump Shot"
+}
+
+/** Linha do box score de um jogador. */
+export interface PlayerLine {
+  id: string;
+  name: string; // "Cedric Coward"
+  shortName: string; // "C. Coward"
+  teamId: string;
+  starter: boolean;
+  played: boolean;
+  min: number;
+  pts: number;
+  reb: number;
+  ast: number;
+  stl: number;
+  blk: number;
+  fg: string; // "6-13"
+  threes: string; // "2-4"
+  ft: string;
 }
 
 export interface GameDetail {
   game: Game;
   plays: Play[]; // mais recentes primeiro
+  players: PlayerLine[];
 }
 
 export type AlertType =
+  | 'game_soon'
   | 'game_start'
   | 'quarter_start'
+  | 'halftime_soon'
   | 'halftime_end'
+  | 'timeout_end'
   | 'overtime_start'
   | 'clutch'
+  | 'lead_change'
+  | 'scoring_run'
+  | 'milestone'
   | 'ejection'
   | 'game_end';
 
-/** Ordem em que os tipos aparecem na tela de alertas. Os textos ficam no app (i18n). */
-export const ALERT_TYPES: AlertType[] = [
-  'game_start',
-  'halftime_end',
-  'quarter_start',
-  'overtime_start',
-  'clutch',
-  'ejection',
-  'game_end',
+/** Grupos da tela de alertas, na ordem em que aparecem. Os textos ficam no app (i18n). */
+export const ALERT_GROUPS: { id: 'back' | 'moments'; types: AlertType[] }[] = [
+  {
+    id: 'back', // avisos para voltar a assistir
+    types: ['game_soon', 'game_start', 'halftime_soon', 'halftime_end', 'quarter_start', 'timeout_end', 'overtime_start'],
+  },
+  {
+    id: 'moments', // momentos do jogo
+    types: ['clutch', 'lead_change', 'scoring_run', 'milestone', 'ejection', 'game_end'],
+  },
 ];
+
+export const ALERT_TYPES: AlertType[] = ALERT_GROUPS.flatMap((g) => g.types);
 
 export type AlertPrefs = Record<AlertType, boolean>;
 
-export const DEFAULT_PREFS: AlertPrefs = {
-  game_start: true,
-  halftime_end: true,
-  quarter_start: true,
-  overtime_start: true,
-  clutch: true,
-  ejection: true,
-  game_end: true,
-};
+export const DEFAULT_PREFS = Object.fromEntries(ALERT_TYPES.map((t) => [t, true])) as AlertPrefs;
+
+/** Configurações das notificações de cada aparelho. */
+export interface DeviceSettings {
+  hideScores: boolean; // modo sem spoiler: não mostra o placar no push
+  delaySeconds: number; // atraso do stream: segura o push esse tempo
+}
+
+export const DEFAULT_SETTINGS: DeviceSettings = { hideScores: false, delaySeconds: 0 };
+export const DELAY_OPTIONS = [0, 15, 30, 45, 60, 90, 120];
 
 export type Platform = 'simulator' | 'ios';
 
@@ -99,6 +130,7 @@ export interface DeviceState {
   favorites: string[]; // ids de times
   games: string[]; // ids de jogos com o sino ligado
   prefs: AlertPrefs;
+  settings: DeviceSettings;
   lang: Lang;
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Game, Play } from '@league-alert/shared';
-import { detectEvents, startedPeriod } from '../src/detector';
+import { detectEvents, detectTimeoutEnd, startedPeriod } from '../src/detector';
 
 const team = (abbr: string, score: number) => ({
   id: abbr, abbr, name: abbr, shortName: abbr, logo: '', color: '000', score, linescores: [],
@@ -98,5 +98,50 @@ describe('detectEvents', () => {
 
   it('fim de jogo não gera "início de período"', () => {
     expect(types(detectEvents(game({ status: 'halftime', period: 2 }), game({ status: 'final', period: 4 })))).toEqual(['game_end']);
+  });
+});
+
+describe('volta de tempo técnico', () => {
+  const play = (id: string, kind: string, clock = '2:52', period = 3): Play => ({
+    id, kind, text: kind, period, clock, homeScore: 0, awayScore: 0, scoring: false,
+  });
+  const timeout = play('t1', 'Full Timeout');
+  const sub = play('s1', 'Substitution');
+  const shot = play('j1', 'Jump Shot', '2:31');
+  const challenge = play('c1', "Coach's Challenge (Overturned)");
+  const paused = live(3, 172); // relógio parado em 2:52
+
+  it('avisa no primeiro lance de bola em jogo depois do pedido de tempo', () => {
+    const r = detectTimeoutEnd(null, paused, [timeout, sub, shot]);
+    expect(r.event?.key).toBe('g1:timeout_end:t1');
+    expect(r.event?.period).toBe(3);
+    expect(r.pending).toBeNull();
+  });
+
+  it('acompanha o pedido de tempo entre rodadas e ignora substituições', () => {
+    let r = detectTimeoutEnd(null, paused, [timeout]);
+    expect(r.event).toBeNull();
+    r = detectTimeoutEnd(r.pending, paused, [sub, challenge]);
+    expect(r.event).toBeNull();
+    expect(r.pending?.playId).toBe('t1');
+    r = detectTimeoutEnd(r.pending, live(3, 151), [shot]);
+    expect(r.event?.type).toBe('timeout_end');
+  });
+
+  it('avisa quando o relógio volta a correr, mesmo sem lance novo', () => {
+    const r1 = detectTimeoutEnd(null, paused, [timeout]);
+    const r2 = detectTimeoutEnd(r1.pending, live(3, 165), []);
+    expect(r2.event?.key).toBe('g1:timeout_end:t1');
+  });
+
+  it('não avisa se o período acabar com o tempo em aberto', () => {
+    const r1 = detectTimeoutEnd(null, paused, [timeout]);
+    const r2 = detectTimeoutEnd(r1.pending, live(4, 700), [play('j2', 'Jump Shot', '11:40', 4)]);
+    expect(r2.event).toBeNull();
+    expect(r2.pending).toBeNull();
+  });
+
+  it('desafio de técnico não conta como pedido de tempo', () => {
+    expect(detectTimeoutEnd(null, paused, [challenge, shot]).event).toBeNull();
   });
 });

@@ -54,7 +54,49 @@ describe('mensagens em inglês', () => {
     expect(buildMessage(ev('game_end'), { ...g(4, 100, 110), status: 'final' }, 'en').body).toBe('Final.');
   });
 
+  it('volta de tempo técnico', () => {
+    expect(buildMessage(ev('timeout_end', { period: 3 }), g(3, 85, 75, '2:31'), 'en').body).toBe(
+      "Timeout's over: play has resumed! 2:31 left in the 3rd quarter.",
+    );
+    expect(buildMessage(ev('timeout_end', { period: 3 }), g(3, 85, 75, '2:31'), 'pt').body).toBe(
+      'Fim do tempo técnico: o jogo voltou! 2:31 no 3º quarto.',
+    );
+  });
+
   it('teste', () => {
     expect(testMessage('en').body).toBe('Test notification: everything is working!');
+  });
+});
+
+describe('novos alertas e modo sem spoiler', () => {
+  it('sem spoiler: título sem placar', () => {
+    const m = buildMessage(ev('halftime_end', { period: 3 }), g(3, 51, 54), 'pt', { hideScores: true });
+    expect(m.title).toBe('🏀 LAL x BOS');
+    expect(m.body).toBe('Fim do intervalo: o 3º quarto começou!');
+    expect(buildMessage(ev('game_end'), { ...g(4, 100, 110), status: 'final' }, 'en', { hideScores: true }).title).toBe('🏁 LAL @ BOS');
+  });
+
+  it('sem spoiler: virada e corrida não dizem quem', () => {
+    const lead = buildMessage(ev('lead_change', { teamId: 'BOS' }), g(4, 100, 101, '1:20'), 'pt', { hideScores: true });
+    expect(lead.body).toBe('Mudança no placar no fim do jogo! 1:20 no 4º quarto.');
+    const run = buildMessage(ev('scoring_run', { teamId: 'BOS', points: 10 }), g(2, 30, 40, '5:00'), 'en', { hideScores: true });
+    expect(run.body).toBe('A team is on a big run! 5:00 left in the 2nd quarter.');
+  });
+
+  it('virada, empate, corrida e marcos', () => {
+    expect(buildMessage(ev('lead_change', { teamId: 'BOS' }), g(4, 100, 101, '1:20'), 'pt').body).toBe('BOS vira o jogo! 1:20 no 4º quarto.');
+    expect(buildMessage(ev('lead_change'), g(4, 100, 100, '0:30'), 'en').body).toBe('Tie game! 0:30 left in the 4th quarter.');
+    expect(buildMessage(ev('scoring_run', { teamId: 'LAL', points: 12, clock: '4:10', period: 2 }), g(2, 40, 30), 'pt').body).toBe(
+      'LAL em corrida de 12-0! 4:10 no 2º quarto.',
+    );
+    expect(buildMessage(ev('milestone', { player: 'P. One', milestone: '40' }), g(4, 0, 0), 'en').body).toBe('P. One has 40 points!');
+    expect(buildMessage(ev('milestone', { player: 'P. One', milestone: 'triple_double' }), g(4, 0, 0), 'pt').body).toBe(
+      'P. One fez um triplo-duplo!',
+    );
+  });
+
+  it('lembrete e intervalo acabando', () => {
+    expect(buildMessage(ev('game_soon'), g(0, 0, 0), 'pt')).toEqual({ title: '⏰ LAL x BOS', body: 'O jogo começa em 15 minutos.' });
+    expect(buildMessage(ev('halftime_soon'), g(2, 50, 48), 'en').body).toBe('Halftime is almost over: the 3rd quarter starts in ~2 min.');
   });
 });

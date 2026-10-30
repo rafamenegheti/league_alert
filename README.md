@@ -1,7 +1,19 @@
 # League Alert
 
-App iOS (Expo/React Native) que mostra os jogos da NBA ao vivo e avisa quando o jogo começa,
-volta do intervalo, volta entre quartos, entra em clutch time, tem ejeção, prorrogação ou termina.
+App iOS (Expo/React Native) que mostra os jogos da NBA ao vivo e avisa a hora de voltar a assistir.
+
+**Alertas** (cada um pode ser ligado/desligado no app):
+
+- Voltar a assistir: lembrete 15 min antes do jogo, início do jogo, intervalo acabando (~2 min antes),
+  volta do intervalo, volta entre quartos, volta de tempo técnico, início de prorrogação.
+- Momentos do jogo: clutch time, virada ou empate nos 2 min finais, corrida de 10 pontos seguidos,
+  marcos de jogador (40/50 pontos, triplo-duplo), ejeção, fim de jogo.
+
+**Notificações:** modo sem spoiler (sem placar no push) e atraso do stream (segura o push para chegar
+junto com a sua transmissão). Textos em português ou inglês, conforme o idioma do iPhone.
+
+**App:** lista de jogos do dia, detalhe com placar por quarto, box score e últimos lances,
+times favoritos e widget da tela inicial (pequeno, médio e grande).
 
 ```
 shared/   tipos usados pelo servidor e pelo app
@@ -57,6 +69,12 @@ O app segue o idioma do iPhone: português (qualquer variante) ou inglês (qualq
   ao abrir, e cada aparelho recebe o push no seu idioma.
 - Para testar em inglês no Simulador sem mudar o sistema:
   `xcrun simctl launch booted com.rafael.leaguealert -AppleLanguages "(en)"`
+
+## Widget
+
+Usa o `expo-widgets` (`app/src/widgets/GamesWidget.tsx`). O app envia os jogos para o widget sempre que
+atualiza a lista; com o app fechado, o widget mostra a última atualização (o horário aparece no canto).
+No iPhone de verdade o widget precisa de App Group, que exige a conta Apple Developer paga.
 
 ## Fonte dos dados
 

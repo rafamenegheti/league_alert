@@ -51,8 +51,32 @@
         "expo-localization",
         {
           "supportedLocales": {
-            "ios": ["en", "pt-BR"]
+            "ios": [
+              "en",
+              "pt-BR"
+            ]
           }
+        }
+      ],
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "GamesWidget",
+              "displayName": "League Alert",
+              "description": "Placares de hoje · Today's scores",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "systemLarge"
+                ],
+                "initialLayout": "./src/widgets/GamesWidget.tsx"
+              },
+              "android": null
+            }
+          ]
         }
       ]
     ],
