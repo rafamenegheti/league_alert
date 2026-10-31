@@ -2,10 +2,11 @@ import { ErrorCode, useIAP, type Product } from 'expo-iap';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { supportTierName, t } from '@/lib/i18n';
 import { SUPPORT_SKUS, SUPPORT_TIERS, supportActions } from '@/lib/support';
 import { colors } from '@/lib/theme';
+import { icons } from '@/lib/icons';
 
 /** Se a loja não responder nesse tempo, mostra que as compras estão indisponíveis. */
 const LOAD_TIMEOUT_MS = 10_000;
@@ -44,12 +45,17 @@ export default function SupportScreen() {
   }, [connected]);
 
   const byId = new Map<string, Product>(products.map((p) => [p.id, p]));
-  const tiers = SUPPORT_TIERS.filter((tier) => byId.has(tier.sku));
+  // Sem resposta da loja (ou sem os produtos cadastrados nela): mostra os valores apagados.
+  const unavailable = failed || (loaded && products.length === 0);
 
   const buy = async (sku: string) => {
+    if (!byId.has(sku)) {
+      if (unavailable) Alert.alert(t('support.unavailable.title'), t('support.unavailable'));
+      return;
+    }
     setBuying(sku);
     try {
-      await requestPurchase({ request: { apple: { sku } }, type: 'in-app' });
+      await requestPurchase({ request: { apple: { sku }, google: { skus: [sku] } }, type: 'in-app' });
     } catch {
       // O erro chega pelo onPurchaseError.
     }
@@ -58,7 +64,7 @@ export default function SupportScreen() {
   if (thanks) {
     return (
       <View style={[styles.screen, styles.center]}>
-        <SymbolView name="heart.fill" tintColor={colors.accent} size={56} />
+        <SymbolView name={icons.heart} tintColor={colors.accent} size={56} />
         <Text style={styles.title}>{t('support.thanks.title')}</Text>
         <Text style={styles.intro}>{t('support.thanks.text')}</Text>
         <Pressable style={styles.primary} onPress={() => router.back()}>
@@ -71,45 +77,50 @@ export default function SupportScreen() {
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <SymbolView name="heart.fill" tintColor={colors.accent} size={40} />
+        <SymbolView name={icons.heart} tintColor={colors.accent} size={40} />
         <Text style={styles.intro}>{t('support.intro')}</Text>
       </View>
 
-      {tiers.length > 0 ? (
-        <View style={styles.grid}>
-          {tiers.map((tier) => {
-            const product = byId.get(tier.sku)!;
-            const busy = buying === tier.sku;
-            return (
-              <Pressable
-                key={tier.sku}
-                disabled={buying !== null}
-                onPress={() => buy(tier.sku)}
-                style={({ pressed }) => [styles.tier, pressed && { backgroundColor: colors.cardPressed }, buying && !busy && { opacity: 0.5 }]}
-                accessibilityRole="button"
-                accessibilityLabel={`${supportTierName(tier.amount)}, ${product.displayPrice}`}
-              >
-                {busy ? (
-                  <ActivityIndicator color={colors.accent} style={{ height: 28 }} />
-                ) : (
-                  <SymbolView name={tier.icon} tintColor={colors.accent} size={28} />
-                )}
-                <Text style={styles.tierName}>{supportTierName(tier.amount)}</Text>
+      <View style={styles.grid}>
+        {SUPPORT_TIERS.map((tier) => {
+          const product = byId.get(tier.sku);
+          const busy = buying === tier.sku;
+          const dimmed = !product || (buying !== null && !busy);
+          return (
+            <Pressable
+              key={tier.sku}
+              disabled={buying !== null}
+              onPress={() => buy(tier.sku)}
+              style={({ pressed }) => [
+                styles.tier,
+                pressed && product && { backgroundColor: colors.cardPressed },
+                dimmed && { opacity: 0.45 },
+              ]}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !product }}
+              accessibilityLabel={product ? `${supportTierName(tier.amount)}, ${product.displayPrice}` : supportTierName(tier.amount)}
+            >
+              {busy ? (
+                <ActivityIndicator color={colors.accent} style={{ height: 28 }} />
+              ) : (
+                <SymbolView name={tier.icon} tintColor={colors.accent} size={28} />
+              )}
+              <Text style={styles.tierName}>{supportTierName(tier.amount)}</Text>
+              {product ? (
                 <Text style={styles.tierPrice}>{product.displayPrice}</Text>
-              </Pressable>
-            );
-          })}
-        </View>
-      ) : failed || (loaded && products.length === 0) ? (
-        <Text style={styles.status}>{t('support.unavailable')}</Text>
-      ) : (
-        <View style={styles.loading}>
-          <ActivityIndicator color={colors.accent} />
-          <Text style={styles.status}>{t('support.loading')}</Text>
-        </View>
-      )}
+              ) : unavailable ? (
+                <Text style={[styles.tierPrice, { color: colors.muted }]}>—</Text>
+              ) : (
+                <ActivityIndicator color={colors.muted} style={{ height: 22 }} />
+              )}
+            </Pressable>
+          );
+        })}
+      </View>
 
-      <Text style={styles.note}>{t('support.note')}</Text>
+      {unavailable ? <Text style={styles.status}>{t('support.unavailable')}</Text> : null}
+
+      <Text style={styles.note}>{t('support.note', { store: Platform.OS === 'android' ? 'Google Play' : 'Apple' })}</Text>
     </ScrollView>
   );
 }
@@ -133,8 +144,7 @@ const styles = StyleSheet.create({
   },
   tierName: { color: colors.text, fontSize: 15, fontWeight: '600' },
   tierPrice: { color: colors.accent, fontSize: 18, fontWeight: '700', fontVariant: ['tabular-nums'] },
-  loading: { alignItems: 'center', gap: 10, marginTop: 20 },
-  status: { color: colors.muted, fontSize: 15, textAlign: 'center', marginTop: 10 },
+  status: { color: colors.muted, fontSize: 15, textAlign: 'center', marginTop: 18 },
   note: { color: colors.muted, fontSize: 13, lineHeight: 18, textAlign: 'center', marginTop: 24, paddingHorizontal: 12 },
   primary: { backgroundColor: colors.accent, borderRadius: 12, paddingHorizontal: 28, paddingVertical: 13, marginTop: 10 },
   primaryText: { color: colors.bg, fontSize: 16, fontWeight: '700' },

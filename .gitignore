@@ -15,3 +15,6 @@ app/web-build/
 
 # configurações locais do Claude Code
 .claude/settings.local.json
+
+# Firebase (push no Android): cada um usa o seu
+app/google-services.json

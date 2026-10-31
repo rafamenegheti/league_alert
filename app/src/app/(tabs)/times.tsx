@@ -4,6 +4,7 @@ import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from '
 import { useDevice, useTeams, useToggleFavorite } from '@/lib/hooks';
 import { t } from '@/lib/i18n';
 import { colors } from '@/lib/theme';
+import { icons } from '@/lib/icons';
 
 export default function TeamsScreen() {
   const { data: teams, isLoading } = useTeams();
@@ -34,7 +35,7 @@ export default function TeamsScreen() {
           >
             <Image source={item.logo} style={styles.logo} contentFit="contain" />
             <Text style={styles.name}>{item.name}</Text>
-            <SymbolView name={on ? 'star.fill' : 'star'} tintColor={on ? colors.accent : colors.muted} size={22} />
+            <SymbolView name={on ? icons.starFill : icons.star} tintColor={on ? colors.accent : colors.muted} size={22} />
           </Pressable>
         );
       }}

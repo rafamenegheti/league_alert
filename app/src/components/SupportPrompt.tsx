@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from '@/lib/i18n';
 import { supportActions, useSupportPromptState } from '@/lib/support';
 import { colors } from '@/lib/theme';
+import { icons } from '@/lib/icons';
 
 /** Pedido de apoio: um cartão discreto na parte de baixo da tela. Quando aparece é decidido em `useSupportPrompt`. */
 export function SupportPrompt() {
@@ -16,7 +17,7 @@ export function SupportPrompt() {
       <Pressable style={styles.backdrop} onPress={supportActions.dismiss} accessibilityLabel={t('support.prompt.later')} />
       <View style={[styles.sheet, { paddingBottom: insets.bottom + 12 }]}>
         <View style={styles.heading}>
-          <SymbolView name="heart.fill" tintColor={colors.accent} size={22} />
+          <SymbolView name={icons.heart} tintColor={colors.accent} size={22} />
           <Text style={styles.title}>{t('support.prompt.title')}</Text>
         </View>
         <Text style={styles.text}>{t('support.prompt.text')}</Text>

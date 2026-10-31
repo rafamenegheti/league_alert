@@ -94,6 +94,50 @@ Usa o `expo-widgets` (`app/src/widgets/GamesWidget.tsx`). O app envia os jogos p
 atualiza a lista; com o app fechado, o widget mostra a última atualização (o horário aparece no canto).
 No iPhone de verdade o widget precisa de App Group, que exige a conta Apple Developer paga.
 
+## Android
+
+O mesmo app roda no Android. O widget ainda é só do iPhone.
+
+Rodar no emulador. Já está tudo instalado neste Mac: Android Studio, SDK em `~/Library/Android/sdk` e o
+emulador `LeagueAlert_Pixel`, com Google Play. Em cada terminal novo:
+
+```bash
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ANDROID_HOME=$HOME/Library/Android/sdk
+```
+
+Ligar o emulador e rodar o app:
+
+```bash
+$ANDROID_HOME/emulator/emulator -avd LeagueAlert_Pixel &
+```
+
+```bash
+cd app && npx expo run:android
+```
+
+O primeiro build demora (uns 20 minutos, baixando ferramentas do Google). Os próximos são rápidos.
+
+Sem `EXPO_PUBLIC_API_URL`, o app procura o servidor no mesmo computador que roda o Metro, na
+porta 3000. Isso funciona no emulador e num celular Android na mesma rede Wi-Fi. No Android dá
+para instalar no próprio celular de graça, pelo cabo USB com a depuração USB ligada.
+
+**Notificações no Android (Firebase, grátis):**
+
+1. Em [console.firebase.google.com](https://console.firebase.google.com), crie um projeto e adicione
+   um app Android com o pacote `com.rafael.leaguealert`.
+2. Baixe o `google-services.json` e coloque em `app/google-services.json`. Depois rode
+   `npx expo prebuild --platform android --clean` e `npx expo run:android`.
+3. Em Configurações do projeto → Contas de serviço → "Gerar nova chave privada", salve o JSON em
+   `server/data/firebase-service-account.json` (ou aponte `FCM_SERVICE_ACCOUNT` para ele) e reinicie
+   o servidor. Ele mostra "Firebase configurado" ao subir.
+
+Os dois arquivos ficam fora do Git. Sem eles, o app funciona normalmente, só não recebe push no Android.
+No emulador, use uma imagem "Google Play" ou "Google APIs", que já vem com o Google Play Services.
+
+**Compras no Android:** usam o Google Play Billing, com os mesmos 6 IDs. Para testar, é preciso a
+conta do Google Play Console (US$ 25, pagos uma vez só), subir o app numa faixa de teste interno e
+criar os 6 produtos lá. Sem isso, a tela de apoio mostra "compras indisponíveis".
+
 ## Apoio ao app (compras dentro do app)
 
 Aba Alertas → **Apoie o League Alert**: 6 valores (R$ 4,90 a R$ 199,90), compra única pela Apple,

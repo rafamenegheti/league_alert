@@ -3,6 +3,7 @@ import type { AlertPrefs, DeviceSettings, DeviceState, Game } from '@league-aler
 import { api } from './api';
 import { getDeviceId, platform } from './device';
 import { lang, region } from './i18n';
+import { getPushToken } from './notifications';
 
 const ACTIVE = new Set(['live', 'halftime', 'end_period']);
 
@@ -38,7 +39,8 @@ export function useTeams() {
 export function useDevice() {
   return useQuery({
     queryKey: ['device'],
-    queryFn: async () => api.register({ deviceId: await getDeviceId(), platform, pushToken: null, lang, region }),
+    queryFn: async () =>
+      api.register({ deviceId: await getDeviceId(), platform, pushToken: await getPushToken(), lang, region }),
     staleTime: Infinity,
     retry: true,
     retryDelay: 3000,

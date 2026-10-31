@@ -5,6 +5,7 @@ import type { ColorValue } from 'react-native';
 import { HeaderButton } from '@/components/HeaderButton';
 import { t } from '@/lib/i18n';
 import { colors } from '@/lib/theme';
+import { icons } from '@/lib/icons';
 
 const logo = require('../../../assets/logo.png');
 
@@ -46,13 +47,13 @@ export default function TabsLayout() {
           headerTitle: () => <LogoTitle />,
           headerRightContainerStyle: { paddingRight: 16 },
           headerRight: () => (
-            <HeaderButton icon="heart.fill" color={colors.accent} label={t('support.title')} onPress={() => router.push('/apoiar')} />
+            <HeaderButton icon={icons.heart} color={colors.accent} label={t('support.title')} onPress={() => router.push('/apoiar')} />
           ),
-          tabBarIcon: icon('basketball.fill'),
+          tabBarIcon: icon(icons.basketballFill),
         }}
       />
-      <Tabs.Screen name="times" options={{ title: t('tab.teams'), tabBarIcon: icon('star.fill') }} />
-      <Tabs.Screen name="ajustes" options={{ title: t('tab.alerts'), tabBarIcon: icon('bell.badge.fill') }} />
+      <Tabs.Screen name="times" options={{ title: t('tab.teams'), tabBarIcon: icon(icons.starFill) }} />
+      <Tabs.Screen name="ajustes" options={{ title: t('tab.alerts'), tabBarIcon: icon(icons.bellBadge) }} />
     </Tabs>
   );
 }

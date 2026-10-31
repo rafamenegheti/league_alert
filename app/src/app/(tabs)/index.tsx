@@ -9,6 +9,7 @@ import { t } from '@/lib/i18n';
 import { useSupportPrompt } from '@/lib/support';
 import { useGamesWidget } from '@/lib/widget';
 import { colors } from '@/lib/theme';
+import { icons } from '@/lib/icons';
 
 export default function GamesScreen() {
   const [date, setDate] = useState<string | null>(null); // null = hoje
@@ -30,13 +31,13 @@ export default function GamesScreen() {
     <View style={styles.screen}>
       <View style={styles.dateBar}>
         <Pressable hitSlop={12} onPress={() => move(-1)} accessibilityLabel={t('day.previous')}>
-          <SymbolView name="chevron.left" tintColor={colors.text} size={20} />
+          <SymbolView name={icons.chevronLeft} tintColor={colors.text} size={20} />
         </Pressable>
         <Pressable onPress={() => setDate(null)}>
           <Text style={styles.dateText}>{shown && today ? dayLabel(shown, today) : ' '}</Text>
         </Pressable>
         <Pressable hitSlop={12} onPress={() => move(1)} accessibilityLabel={t('day.next')}>
-          <SymbolView name="chevron.right" tintColor={colors.text} size={20} />
+          <SymbolView name={icons.chevronRight} tintColor={colors.text} size={20} />
         </Pressable>
       </View>
 

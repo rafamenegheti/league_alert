@@ -1,4 +1,5 @@
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import semiBold from 'expo-symbols/androidWeights/semiBold';
 import { Pressable, StyleSheet } from 'react-native';
 import { colors } from '@/lib/theme';
 
@@ -22,7 +23,7 @@ export function HeaderButton({
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <SymbolView name={icon} tintColor={color} size={17} weight="semibold" />
+      <SymbolView name={icon} tintColor={color} size={17} weight={{ ios: 'semibold', android: semiBold }} />
     </Pressable>
   );
 }

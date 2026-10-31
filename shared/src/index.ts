@@ -127,7 +127,9 @@ export interface DeviceSettings {
 export const DEFAULT_SETTINGS: DeviceSettings = { hideScores: false, delaySeconds: 0 };
 export const DELAY_OPTIONS = [0, 15, 30, 45, 60, 90, 120];
 
-export type Platform = 'simulator' | 'ios';
+/** simulator: Simulador do iPhone (push via simctl); ios: iPhone (APNs); android: celular ou emulador (FCM). */
+export type Platform = 'simulator' | 'ios' | 'android';
+export const PLATFORMS: Platform[] = ['simulator', 'ios', 'android'];
 
 /** Idiomas suportados. Qualquer outro idioma do aparelho cai em inglês. */
 export type Lang = 'pt' | 'en';

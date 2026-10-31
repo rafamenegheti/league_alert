@@ -2,10 +2,10 @@
 import type { DeviceState, Game } from '@league-alert/shared';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
-import type { SymbolViewProps } from 'expo-symbols';
 import { useCallback, useEffect, useSyncExternalStore } from 'react';
 import { AppState } from 'react-native';
 import { isActive } from './format';
+import { icons, type IconName } from './icons';
 import { followState } from './hooks';
 import {
   initialSupportState,
@@ -19,13 +19,13 @@ import {
 } from './supportRules';
 
 /** Valores de apoio (compra consumível: pode apoiar quantas vezes quiser). */
-export const SUPPORT_TIERS: { sku: string; amount: number; icon: SymbolViewProps['name'] }[] = [
-  { sku: 'com.rafael.leaguealert.apoio.5', amount: 5, icon: 'basketball' },
-  { sku: 'com.rafael.leaguealert.apoio.10', amount: 10, icon: 'figure.basketball' },
-  { sku: 'com.rafael.leaguealert.apoio.25', amount: 25, icon: 'target' },
-  { sku: 'com.rafael.leaguealert.apoio.50', amount: 50, icon: 'flame.fill' },
-  { sku: 'com.rafael.leaguealert.apoio.100', amount: 100, icon: 'star.fill' },
-  { sku: 'com.rafael.leaguealert.apoio.200', amount: 200, icon: 'trophy.fill' },
+export const SUPPORT_TIERS: { sku: string; amount: number; icon: IconName }[] = [
+  { sku: 'com.rafael.leaguealert.apoio.5', amount: 5, icon: icons.basketball },
+  { sku: 'com.rafael.leaguealert.apoio.10', amount: 10, icon: icons.player },
+  { sku: 'com.rafael.leaguealert.apoio.25', amount: 25, icon: icons.target },
+  { sku: 'com.rafael.leaguealert.apoio.50', amount: 50, icon: icons.flame },
+  { sku: 'com.rafael.leaguealert.apoio.100', amount: 100, icon: icons.starFill },
+  { sku: 'com.rafael.leaguealert.apoio.200', amount: 200, icon: icons.trophy },
 ];
 export const SUPPORT_SKUS = SUPPORT_TIERS.map((tier) => tier.sku);
 

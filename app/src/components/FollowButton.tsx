@@ -4,6 +4,7 @@ import type { Game } from '@league-alert/shared';
 import { followState, useDevice, useToggleGame, useToggleMute } from '@/lib/hooks';
 import { t } from '@/lib/i18n';
 import { colors } from '@/lib/theme';
+import { icons } from '@/lib/icons';
 
 /**
  * Botão de alertas do jogo:
@@ -22,10 +23,10 @@ export function FollowButton({ game, size = 22 }: { game: Game; size?: number })
   if (done && (state === 'none' || state === 'muted')) return null;
 
   const look: Record<typeof state, { icon: SymbolViewProps['name']; color: string; label: string }> = {
-    favorite: { icon: 'star.fill', color: colors.accent, label: t('follow.favorite') },
-    muted: { icon: 'bell.slash', color: colors.muted, label: t('follow.muted') },
-    bell: { icon: 'bell.fill', color: colors.accent, label: t('follow.off') },
-    none: { icon: 'bell', color: colors.muted, label: t('follow.on') },
+    favorite: { icon: icons.starFill, color: colors.accent, label: t('follow.favorite') },
+    muted: { icon: icons.bellSlash, color: colors.muted, label: t('follow.muted') },
+    bell: { icon: icons.bellFill, color: colors.accent, label: t('follow.off') },
+    none: { icon: icons.bell, color: colors.muted, label: t('follow.on') },
   };
 
   const onPress = () => {

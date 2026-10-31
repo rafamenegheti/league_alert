@@ -7,9 +7,22 @@ import type {
   RegisterDeviceBody,
   Team,
 } from '@league-alert/shared';
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 
-// No Simulador, localhost é o próprio Mac. No iPhone, use o IP do Mac na rede (EXPO_PUBLIC_API_URL).
-export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
+/**
+ * Endereço do servidor. EXPO_PUBLIC_API_URL tem prioridade (ex.: servidor hospedado).
+ * Sem ela, usa o mesmo computador que serve o app em desenvolvimento (o Metro), na porta 3000:
+ * funciona no Simulador, no emulador Android e num celular na mesma rede Wi-Fi.
+ */
+function devServerUrl(): string {
+  const host = Constants.expoConfig?.hostUri?.split(':')[0];
+  if (host) return `http://${host}:3000`;
+  // No emulador Android, o Mac é 10.0.2.2 (localhost é o próprio emulador).
+  return Platform.OS === 'android' ? 'http://10.0.2.2:3000' : 'http://localhost:3000';
+}
+
+export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? devServerUrl();
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {

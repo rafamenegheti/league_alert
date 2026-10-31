@@ -11,6 +11,7 @@ import { alertDescription, alertLabel, t } from '@/lib/i18n';
 import { ensurePermission } from '@/lib/notifications';
 import { supportActions, useSupportState } from '@/lib/support';
 import { colors } from '@/lib/theme';
+import { icons } from '@/lib/icons';
 
 export default function AlertsScreen() {
   const { data: device } = useDevice();
@@ -53,12 +54,12 @@ export default function AlertsScreen() {
         style={({ pressed }) => [styles.group, styles.row, styles.supportCard, pressed && { backgroundColor: colors.cardPressed }]}
         accessibilityRole="button"
       >
-        <SymbolView name="heart.fill" tintColor={colors.accent} size={24} />
+        <SymbolView name={icons.heart} tintColor={colors.accent} size={24} />
         <View style={{ flex: 1 }}>
           <Text style={styles.label}>{t('support.title')}</Text>
           <Text style={styles.desc}>{support?.supportedAt ? t('support.row.thanks') : t('support.row.desc')}</Text>
         </View>
-        <SymbolView name="chevron.right" tintColor={colors.muted} size={14} />
+        <SymbolView name={icons.chevronRight} tintColor={colors.muted} size={14} />
       </Pressable>
 
       <Text style={styles.section}>{t('settings.title')}</Text>
@@ -147,7 +148,7 @@ export default function AlertsScreen() {
       <Text style={styles.footer}>
         {t('alerts.server')}: {API_URL}
         {'\n'}
-        {t('alerts.device')}: {platform === 'simulator' ? t('alerts.simulator') : t('alerts.iphone')}
+        {t('alerts.device')}: {platform === 'simulator' ? t('alerts.simulator') : platform === 'android' ? t('alerts.android') : t('alerts.iphone')}
       </Text>
     </ScrollView>
   );

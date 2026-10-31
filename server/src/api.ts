@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import {
+  PLATFORMS,
   toLang,
   type AlertPrefs,
   type DeviceSettings,
@@ -36,7 +37,7 @@ export function buildApi(db: Db, games: GameService, notifier: Notifier, br?: Br
 
   app.post<{ Body: RegisterDeviceBody }>('/devices', async (req) => {
     const { deviceId, platform, pushToken = null, lang, region } = req.body;
-    if (!deviceId || (platform !== 'simulator' && platform !== 'ios')) {
+    if (!deviceId || !PLATFORMS.includes(platform)) {
       throw Object.assign(new Error('deviceId and platform are required'), { statusCode: 400 });
     }
     const country = typeof region === 'string' && /^[A-Za-z]{2}$/.test(region) ? region.toUpperCase() : null;
